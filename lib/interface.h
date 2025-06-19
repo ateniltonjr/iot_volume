@@ -92,6 +92,7 @@ static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
     }
 
     char *req = (char *)p->payload;
+    printf("[DEBUG] Requisição HTTP recebida: %s\n", req); // <-- Adicionado para debug
     struct http_state *hs = malloc(sizeof(struct http_state));
     if (!hs)
     {

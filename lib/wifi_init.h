@@ -35,6 +35,7 @@ int iniciar_wifi(const char* ssid, const char* pass)
     uint8_t *ip = (uint8_t *)&(cyw43_state.netif[0].ip_addr.addr);
     
     snprintf(ip_str, sizeof(ip_str), "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+    printf("[DEBUG] IP do dispositivo: %s\n", ip_str); // <-- Adicionado para debug
 
     ssd1306_fill(&ssd, false);
     ssd1306_draw_string(&ssd, "WiFi => OK", 0, 0);
