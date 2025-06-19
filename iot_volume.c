@@ -13,8 +13,8 @@
 #include "wifi_init.h"
 
 #define potenciometro 28
-#define WIFI_SSID "KLAZ"
-#define WIFI_PASS "10213250"
+#define WIFI_SSID "usuario"
+#define WIFI_PASS "senha"
 
 char str_x[5]; // Buffer para armazenar a string
 char str_v[5];
