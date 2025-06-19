@@ -1,4 +1,0 @@
-[wokwi]
-version = 1
-firmware = 'build/iot_volume.uf2'
-elf = 'build/iot_volume.elf'
