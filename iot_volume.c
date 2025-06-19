@@ -1,31 +1,16 @@
-#include "pico/cyw43_arch.h"
-#include "pico/stdlib.h"
 #include "lwip/tcp.h"
-#include "hardware/i2c.h"
-#include "hardware/adc.h"
-#include "hardware/gpio.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include "display.h"
-#include "reles.h"
 #include "interface.h"
 #include "wifi_init.h"
 
-#define potenciometro 28
 #define WIFI_SSID "KLAZ"
 #define WIFI_PASS "10213250"
 
-char str_x[5]; // Buffer para armazenar a string
-char str_v[5];
-bool cor = true;
+char str_x[5], str_v[5]; // Buffer para armazenar a string
 
-void exibicoes()
+void exibicoes_display()
 {
-    // Leitura dos valores analógicos
-    adc_select_input(2);
-    uint16_t adc_value_x = adc_read();
-    float volume = (adc_value_x / 4095.0) * 100.0;
+    adc_gpio28(); // Chama a função para ler o ADC do GPIO 28
 
     sprintf(str_x, "%d", adc_value_x);            // Converte o inteiro em string
     sprintf(str_v, "%.0f", volume);
@@ -60,15 +45,15 @@ int main()
     adc_init();
     adc_gpio_init(potenciometro);
 
-    start_http_server();
+    start_http_server(); 
     
     while (true)
     {
         cyw43_arch_poll();
-        exibicoes();
+        exibicoes_display();
         sleep_ms(300);
     }
 
-    cyw43_arch_deinit();
-    return 0;
+    cyw43_arch_deinit(); // Desativa o Wi-Fi
+    return 0; // Finaliza o programa
 }

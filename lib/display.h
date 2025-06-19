@@ -8,6 +8,7 @@
 #define I2C_SCL_DISP 15
 #define endereco 0x3C
 ssd1306_t ssd;
+bool cor = true;
     
 void iniciar_display()
 {

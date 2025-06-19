@@ -10,7 +10,7 @@
 const char HTML_BODY[] =
     "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Controle do LED</title>"
     "<style>"
-    "body { font-family: sans-serif; text-align: center; padding: 10px; margin: 0; background: #f9f9f9; }"
+    "body { font-family: sans-serif; text-align: center; padding: 10px; margin: 0; background:rgb(250, 250, 250); }"
     ".botao { font-size: 20px; padding: 10px 30px; margin: 10px; border: none; border-radius: 8px; }"
     ".on { background: #4CAF50; color: white; }"
     ".off { background: #f44336; color: white; }"
@@ -32,7 +32,11 @@ const char HTML_BODY[] =
     "    document.getElementById('joy').innerText = data.joy ? 'Pressionado' : 'Solto';"
     "    document.getElementById('bolinha_a').style.background = data.botao ? '#2126F3' : '#ccc';"
     "    document.getElementById('bolinha_joy').style.background = data.joy ? '#4C7F50' : '#ccc';"
-    "    document.getElementById('barra_x').style.width = Math.round(data.x) + '%';" // Agora x já está em 0-100
+    "    document.getElementById('barra_x').style.width = Math.round(data.x) + '%';"
+    "    let alerta = '';"
+    "    if (data.x == 75 || data.x == 80 || data.x == 85) { alerta = 'ALERTA: Volume do reservatório em ' + data.x + '%!'; }"
+    "    else if (data.x > 90) { alerta = 'Volume acima de 90%! Bomba desligada automaticamente!'; }"
+    "    document.getElementById('alerta').innerText = alerta;"
     "  });"
     "}"
     "setInterval(atualizar, 1000);"
@@ -50,6 +54,8 @@ const char HTML_BODY[] =
 
     "<button class='botao on' onclick=\"sendCommand('on')\">Ligar bomba</button>"
     "<button class='botao off' onclick=\"sendCommand('off')\">Desligar bomba</button>"
+
+    "<p id='alerta' style='color: red; font-weight: bold; font-size: 18px;'></p>"
 
     "<hr style='margin-top: 20px;'>"
     "<p style='font-size: 15px; color: #336699; font-style: italic; max-width: 90%; margin: 10px auto;'>"
@@ -123,8 +129,9 @@ static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
     }
     else if (strstr(req, "GET /estado"))
     {
-        adc_select_input(2);
-        float x = (adc_read() / 4095.0) * 100.0; 
+        adc_gpio28(); // Chama a função para ler o ADC do GPIO 28
+        alerta_volume(); // Verifica alertas e desliga relé se necessário
+        float x = volume;
         int botao = !gpio_get(BOTAO_A);
         int joy = !gpio_get(BOTAO_JOY);
 

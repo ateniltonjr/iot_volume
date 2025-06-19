@@ -32,4 +32,26 @@ void iniciar_botoes()
     gpio_set_dir(rele1, GPIO_OUT);
 }
 
+#include "hardware/adc.h"
+#define potenciometro 28
+
+uint16_t adc_value_x;
+float volume;
+
+void adc_gpio28()
+{
+    // Leitura dos valores analógicos
+    adc_select_input(2);
+    adc_value_x = adc_read();
+    volume = (adc_value_x / 4095.0) * 100.0;
+}
+
+void alerta_volume() {
+    if (volume >= 90.0) {
+        gpio_put(rele1, 0); // Desliga o relé automaticamente
+    } else if (volume == 85.0 || volume == 80.0 || volume == 75.0) {
+        printf("ALERTA: Volume do reservatório em %.0f%%!\n", volume);
+    }
+}
+
 #endif
