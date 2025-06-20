@@ -4,8 +4,8 @@
 #include "wifi_init.h"
 #include "desenho_matriz.h"
 
-#define WIFI_SSID "Tesla"
-#define WIFI_PASS "123456788"
+#define WIFI_SSID "nome_wifi"
+#define WIFI_PASS "senha_wifi"
 #define SENSOR_PIN 26 // Pino ADC para o potenciômetro
 
 char str_x[5], str_v[5]; // Buffer para armazenar a string
