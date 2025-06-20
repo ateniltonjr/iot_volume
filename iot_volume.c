@@ -2,6 +2,7 @@
 #include "display.h"
 #include "interface.h"
 #include "wifi_init.h"
+#include "desenho_matriz.h"
 
 #define WIFI_SSID "Jesus é o caminho"
 #define WIFI_PASS "123456789"
@@ -39,6 +40,7 @@ int main()
     gpio_set_irq_enabled_with_callback(BOTAO_B, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler);
 
     stdio_init_all();
+    controle(PINO_MATRIZ); // Inicializa a matriz de LEDs
     iniciar_wifi(WIFI_SSID, WIFI_PASS);
     sleep_ms(2000);
 
