@@ -4,8 +4,9 @@
 #include "wifi_init.h"
 #include "desenho_matriz.h"
 
-#define WIFI_SSID "Jesus é o caminho"
-#define WIFI_PASS "123456789"
+#define WIFI_SSID "Tesla"
+#define WIFI_PASS "123456788"
+#define SENSOR_PIN 26 // Pino ADC para o potenciômetro
 
 char str_x[5], str_v[5]; // Buffer para armazenar a string
 
@@ -34,28 +35,87 @@ void exibicoes_display()
 }
 
 int main()
-{   
-    iniciar_display();
-    iniciar_botoes();
+{
+    gpio_init(BOTAO_B);
+    gpio_set_dir(BOTAO_B, GPIO_IN);
+    gpio_pull_up(BOTAO_B);
     gpio_set_irq_enabled_with_callback(BOTAO_B, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler);
 
     stdio_init_all();
-    controle(PINO_MATRIZ); // Inicializa a matriz de LEDs
-    iniciar_wifi(WIFI_SSID, WIFI_PASS);
     sleep_ms(2000);
 
-    adc_init();
-    adc_gpio_init(potenciometro);
+    gpio_init(PUMP_PIN);
+    gpio_set_dir(PUMP_PIN, GPIO_OUT);
 
-    start_http_server(); 
-    
+    adc_init();
+    adc_gpio_init(SENSOR_PIN);
+
+    i2c_init(I2C_PORT_DISP, 400 * 1000);
+    gpio_set_function(I2C_SDA_DISP, GPIO_FUNC_I2C);
+    gpio_set_function(I2C_SCL_DISP, GPIO_FUNC_I2C);
+    gpio_pull_up(I2C_SDA_DISP);
+    gpio_pull_up(I2C_SCL_DISP);
+
+    ssd1306_t ssd;
+    ssd1306_init(&ssd, WIDTH, HEIGHT, false, endereco, I2C_PORT_DISP);
+    ssd1306_config(&ssd);
+    ssd1306_fill(&ssd, false);
+    ssd1306_draw_string(&ssd, "Iniciando Wi-Fi", 0, 0);
+    ssd1306_draw_string(&ssd, "Aguarde...", 0, 30);
+    ssd1306_send_data(&ssd);
+
+    if (cyw43_arch_init())
+    {
+        ssd1306_fill(&ssd, false);
+        ssd1306_draw_string(&ssd, "WiFi => FALHA", 0, 0);
+        ssd1306_send_data(&ssd);
+        return 1;
+    }
+
+    cyw43_arch_enable_sta_mode();
+    if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASS, CYW43_AUTH_WPA2_AES_PSK, 200000))
+    {
+        ssd1306_fill(&ssd, false);
+        ssd1306_draw_string(&ssd, "WiFi => ERRO", 0, 0);
+        ssd1306_send_data(&ssd);
+        return 1;
+    }
+
+    uint8_t *ip = (uint8_t *)&(cyw43_state.netif[0].ip_addr.addr);
+    char ip_str[24];
+    snprintf(ip_str, sizeof(ip_str), "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+
+    ssd1306_fill(&ssd, false);
+    ssd1306_draw_string(&ssd, "WiFi => OK", 0, 0);
+    ssd1306_draw_string(&ssd, ip_str, 0, 10);
+    ssd1306_send_data(&ssd);
+
+    start_http_server();
+
     while (true)
     {
         cyw43_arch_poll();
-        exibicoes_display();
-        sleep_ms(300);
+
+        adc_select_input(0);
+        uint16_t sensorValue = adc_read();
+        int nivel = (sensorValue * 100) / 4095;
+        int pumpState = gpio_get(PUMP_PIN);
+
+        // Controle automático da bomba com base nos níveis atualizados
+        if (nivel <= minLevel && !pumpState)
+        {
+            gpio_put(PUMP_PIN, 1);
+            pumpState = 1;
+        }
+        else if (nivel >= maxLevel && pumpState)
+        {
+            gpio_put(PUMP_PIN, 0);
+            pumpState = 0;
+        }
+
+        sleep_ms(500); // Reduzido para aliviar o processador
     }
 
-    cyw43_arch_deinit(); // Desativa o Wi-Fi
-    return 0; // Finaliza o programa
+    cyw43_arch_deinit();
+    return 0;
 }
