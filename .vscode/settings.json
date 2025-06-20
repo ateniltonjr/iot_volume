@@ -42,6 +42,8 @@
         "ssd1306.h": "c",
         "font.h": "c",
         "cyw43_arch.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "compare": "c",
+        "cstdint": "c"
     }
 }
