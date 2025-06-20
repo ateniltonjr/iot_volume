@@ -25,7 +25,7 @@ pico_sdk_init()
 include_directories( ${CMAKE_SOURCE_DIR}/lib ) 
 
 add_executable(${PROJECT_NAME}  
-        iot_volume.c
+        iot_volume.c #Principal
         lib/ssd1306.c
         )
 
