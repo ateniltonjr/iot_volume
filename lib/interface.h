@@ -1,72 +1,27 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "pico/stdlib.h"
 #include "reles.h" 
 
+
+
+#define PUMP_PIN 12   // Pino para a bomba
+int minLevel = 20; // Nível mínimo padrão
+int maxLevel = 80; // Nível máximo padrão
+
 const char HTML_BODY[] =
-    "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Controle do LED</title>"
-    "<style>"
-    "body { font-family: sans-serif; text-align: center; padding: 10px; margin: 0; background:rgb(250, 250, 250); }"
-    ".botao { font-size: 20px; padding: 10px 30px; margin: 10px; border: none; border-radius: 8px; }"
-    ".on { background: #4CAF50; color: white; }"
-    ".off { background: #f44336; color: white; }"
-    ".barra { width: 30%; background: #ddd; border-radius: 6px; overflow: hidden; margin: 0 auto 15px auto; height: 20px; }"
-
-    ".preenchimento { height: 100%; transition: width 0.3s ease; }"
-    "#barra_x { background: #2196F3; }"
-    ".label { font-weight: bold; margin-bottom: 5px; display: block; }"
-    ".bolinha { width: 20px; height: 20px; border-radius: 50%; display: inline-block; margin-left: 10px; background: #ccc; transition: background 0.3s ease; }"
-    "@media (max-width: 600px) { .botao { width: 80%; font-size: 18px; } }"
-    "</style>"
-    "<script>"
-    "function sendCommand(cmd) { fetch('/RELE1/' + cmd); }"
-    "function atualizar() {"
-    "  fetch('/estado').then(res => res.json()).then(data => {"
-    "    document.getElementById('estado').innerText = data.RELE1 ? 'Bomba ligada' : 'bomba desligada';"
-    "    document.getElementById('x_valor').innerText = data.x;"
-    "    document.getElementById('botao').innerText = data.botao ? 'Pressionado' : 'Solto';"
-    "    document.getElementById('joy').innerText = data.joy ? 'Pressionado' : 'Solto';"
-    "    document.getElementById('bolinha_a').style.background = data.botao ? '#2126F3' : '#ccc';"
-    "    document.getElementById('bolinha_joy').style.background = data.joy ? '#4C7F50' : '#ccc';"
-    "    document.getElementById('barra_x').style.width = Math.round(data.x) + '%';"
-    "    let alerta = '';"
-    "    if (data.x == 75 || data.x == 80 || data.x == 85) { alerta = 'ALERTA: Volume do reservatório em ' + data.x + '%!'; }"
-    "    else if (data.x > 90) { alerta = 'Volume acima de 90%! Bomba desligada automaticamente!'; }"
-    "    document.getElementById('alerta').innerText = alerta;"
-    "  });"
-    "}"
-    "setInterval(atualizar, 1000);"
-    "</script></head><body>"
-
-    "<h1>MONITORAMENTO DE VOLUME E CONTROLE DE BOMBA D'AGUA</h1>"
-
-    "<p>Status: <span id='estado'>--</span></p>"
-
-    "<p class='label'>VOLUME DO RESERVATÓRIO: <span id='x_valor'>--</span></p>"
-    "<div class='barra'><div id='barra_x' class='preenchimento'></div></div>"
-
-    "<p class='label'>Botão A: <span id='botao'>--</span> <span id='bolinha_a' class='bolinha'></span></p>"
-    "<p class='label'>Botão do Joystick: <span id='joy'>--</span> <span id='bolinha_joy' class='bolinha'></span></p>"
-
-    "<button class='botao on' onclick=\"sendCommand('on')\">Ligar bomba</button>"
-    "<button class='botao off' onclick=\"sendCommand('off')\">Desligar bomba</button>"
-
-    "<p id='alerta' style='color: red; font-weight: bold; font-size: 18px;'></p>"
-
-    "<hr style='margin-top: 20px;'>"
-    "<p style='font-size: 15px; color: #336699; font-style: italic; max-width: 90%; margin: 10px auto;'>"
-    "Utilização da BitDogLab para exemplificar a comunicação via rede Wi-Fi utilizando o protocolo HTML com JavaScript"
-    "</p>"
-
-    "</body></html>";
+    "<!DOCTYPE html><html lang='pt-BR'><head><meta charset='UTF-8'><title>Controle de Nível</title>"
+    "<style>body{font-family:sans-serif;text-align:center;margin:0;background:#f0f0f0}.tank{width:150px;height:250px;background:#b0c4de;border:2px solid #bdc3c7;margin:20px auto;position:relative}.water-level{width:100%;background:#3498db;position:absolute;bottom:0}.level-display{position:absolute;bottom:5px;width:100%;color:white;font-weight:bold;text-shadow:1px 1px 2px black}.pump{width:80px;height:40px;margin:10px auto;background:#e74c3c;border:2px solid #bdc3c7;text-align:center;line-height:40px}.pump.on{background:#2ecc71}.pump-status{margin:5px;font-weight:bold}.config{margin:10px}.config label{margin-right:5px}.config input{padding:5px;border:1px solid #bdc3c7}</style>"
+    "<script>function sendCommand(cmd){fetch('/control?cmd='+cmd)}function atualizar(){fetch('/estado').then(res=>res.json()).then(data=>{document.getElementById('waterLevel').style.height=data.nivel+'%';document.getElementById('currentLevel').innerText='Nível: '+data.nivel+'%';const pump=document.getElementById('pump');pump.className='pump'+(data.pump?' on':'');document.getElementById('pumpStatus').innerText='Bomba: '+(data.pump?'Ligada':'Desligada');pump.innerText=data.pump?'Bomba ON':'Bomba'})}setInterval(atualizar,2000)</script></head><body><h1>Controle de Nível</h1><div class='tank'><div class='water-level' id='waterLevel'></div><div class='level-display' id='currentLevel'>Nível: 0%</div></div><div class='pump' id='pump'>Bomba</div><div class='pump-status' id='pumpStatus'>Bomba: Desligada</div><div class='config'><label for='minLevel'>Mínimo (%):</label><input type='number' id='minLevel' min='0' max='100' value='20' onchange=\"sendCommand('min='+this.value)\"><label for='maxLevel'>Máximo (%):</label><input type='number' id='maxLevel' min='0' max='100' value='80' onchange=\"sendCommand('max='+this.value)\"></div></body></html>";
 
 struct http_state
 {
-    char response[4096];
+    char response[2048]; // Reduzido para aliviar memória
     size_t len;
     size_t sent;
 };
@@ -92,7 +47,6 @@ static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
     }
 
     char *req = (char *)p->payload;
-    printf("[DEBUG] Requisição HTTP recebida: %s\n", req); // <-- Adicionado para debug
     struct http_state *hs = malloc(sizeof(struct http_state));
     if (!hs)
     {
@@ -102,74 +56,102 @@ static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
     }
     hs->sent = 0;
 
-    if (strstr(req, "GET /RELE1/on"))
+    printf("Requisição recebida: %s\n", req ? req : "NULL"); // Debug: Exibe a requisição completa
+
+    char *controlStart = strstr(req, "GET /control?");
+    if (controlStart)
     {
-        gpio_put(rele1, 1);
-        const char *txt = "Ligado";
-        hs->len = snprintf(hs->response, sizeof(hs->response),
-                           "HTTP/1.1 200 OK\r\n"
-                           "Content-Type: text/plain\r\n"
-                           "Content-Length: %d\r\n"
-                           "Connection: close\r\n"
-                           "\r\n"
-                           "%s",
-                           (int)strlen(txt), txt);
-    }
-    else if (strstr(req, "GET /RELE1/off"))
-    {
-        gpio_put(rele1, 0);
-        const char *txt = "Desligado";
-        hs->len = snprintf(hs->response, sizeof(hs->response),
-                           "HTTP/1.1 200 OK\r\n"
-                           "Content-Type: text/plain\r\n"
-                           "Content-Length: %d\r\n"
-                           "Connection: close\r\n"
-                           "\r\n"
-                           "%s",
-                           (int)strlen(txt), txt);
+        printf("Encontrou /control na requisição\n");
+        char *paramStart = strstr(controlStart, "min=");
+        if (paramStart)
+        {
+            printf("Encontrou parâmetro min\n");
+            paramStart += 4; // Pula "min="
+            char *paramEnd = strchr(paramStart, ' ');
+            if (paramEnd)
+            {
+                *paramEnd = '\0';
+                minLevel = atoi(paramStart);
+                if (minLevel < 0) minLevel = 0;
+                if (minLevel > 100) minLevel = 100;
+                printf("Atualizado minLevel para: %d\n", minLevel); // Debug: Confirma o novo valor
+                const char *txt = "Mínimo Atualizado";
+                hs->len = snprintf(hs->response, sizeof(hs->response),
+                                   "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\nConnection: close\r\n\r\n%s",
+                                   (int)strlen(txt), txt);
+            }
+            else
+            {
+                printf("Erro: Não encontrou fim do parâmetro min\n");
+                const char *txt = "Erro no parâmetro";
+                hs->len = snprintf(hs->response, sizeof(hs->response),
+                                   "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\nContent-Length: %d\r\nConnection: close\r\n\r\n%s",
+                                   (int)strlen(txt), txt);
+            }
+        }
+        else
+        {
+            paramStart = strstr(controlStart, "max=");
+            if (paramStart)
+            {
+                printf("Encontrou parâmetro max\n");
+                paramStart += 4; // Pula "max="
+                char *paramEnd = strchr(paramStart, ' ');
+                if (paramEnd)
+                {
+                    *paramEnd = '\0';
+                    maxLevel = atoi(paramStart);
+                    if (maxLevel < 0) maxLevel = 0;
+                    if (maxLevel > 100) maxLevel = 100;
+                    printf("Atualizado maxLevel para: %d\n", maxLevel); // Debug: Confirma o novo valor
+                    const char *txt = "Máximo Atualizado";
+                    hs->len = snprintf(hs->response, sizeof(hs->response),
+                                       "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\nConnection: close\r\n\r\n%s",
+                                       (int)strlen(txt), txt);
+                }
+                else
+                {
+                    printf("Erro: Não encontrou fim do parâmetro max\n");
+                    const char *txt = "Erro no parâmetro";
+                    hs->len = snprintf(hs->response, sizeof(hs->response),
+                                       "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\nContent-Length: %d\r\nConnection: close\r\n\r\n%s",
+                                       (int)strlen(txt), txt);
+                }
+            }
+        }
     }
     else if (strstr(req, "GET /estado"))
     {
-        adc_gpio28(); // Chama a função para ler o ADC do GPIO 28
-        alerta_volume(); // Verifica alertas e desliga relé se necessário
-        float x = volume;
-        int botao = !gpio_get(BOTAO_A);
-        int joy = !gpio_get(BOTAO_JOY);
+        adc_select_input(0);
+        uint16_t sensorValue = adc_read();
+        int nivel = (sensorValue * 100) / 4095;
+        int pumpState = gpio_get(PUMP_PIN);
 
-        char json_payload[96];
-        int json_len = snprintf(json_payload, sizeof(json_payload),
-                                "{\"RELE1\":%d,\"x\":%.0f,\"botao\":%d,\"joy\":%d}\r\n",
-                                gpio_get(rele1), x, botao, joy);
-
-        printf("[DEBUG] JSON: %s\n", json_payload);
-
+        char json_payload[32];
+        int json_len = snprintf(json_payload, sizeof(json_payload), "{\"nivel\":%d,\"pump\":%d}", nivel, pumpState);
         hs->len = snprintf(hs->response, sizeof(hs->response),
-                           "HTTP/1.1 200 OK\r\n"
-                           "Content-Type: application/json\r\n"
-                           "Content-Length: %d\r\n"
-                           "Connection: close\r\n"
-                           "\r\n"
-                           "%s",
+                           "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: %d\r\nConnection: close\r\n\r\n%s",
+                           json_len, json_payload);
+    }
+    else if (strstr(req, "GET /config"))
+    {
+        char json_payload[32];
+        int json_len = snprintf(json_payload, sizeof(json_payload), "{\"minLevel\":%d,\"maxLevel\":%d}", minLevel, maxLevel);
+        hs->len = snprintf(hs->response, sizeof(hs->response),
+                           "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: %d\r\nConnection: close\r\n\r\n%s",
                            json_len, json_payload);
     }
     else
     {
         hs->len = snprintf(hs->response, sizeof(hs->response),
-                           "HTTP/1.1 200 OK\r\n"
-                           "Content-Type: text/html\r\n"
-                           "Content-Length: %d\r\n"
-                           "Connection: close\r\n"
-                           "\r\n"
-                           "%s",
+                           "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: %d\r\nConnection: close\r\n\r\n%s",
                            (int)strlen(HTML_BODY), HTML_BODY);
     }
 
     tcp_arg(tpcb, hs);
     tcp_sent(tpcb, http_sent);
-
     tcp_write(tpcb, hs->response, hs->len, TCP_WRITE_FLAG_COPY);
     tcp_output(tpcb);
-
     pbuf_free(p);
     return ERR_OK;
 }
@@ -184,15 +166,9 @@ static void start_http_server(void)
 {
     struct tcp_pcb *pcb = tcp_new();
     if (!pcb)
-    {
-        printf("Erro ao criar PCB TCP\n");
         return;
-    }
     if (tcp_bind(pcb, IP_ADDR_ANY, 80) != ERR_OK)
-    {
-        printf("Erro ao ligar o servidor na porta 80\n");
         return;
-    }
     pcb = tcp_listen(pcb);
     tcp_accept(pcb, connection_callback);
     printf("Servidor HTTP rodando na porta 80...\n");

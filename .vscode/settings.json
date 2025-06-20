@@ -38,6 +38,8 @@
     "raspberry-pi-pico.cmakePath": "${HOME}/.pico-sdk/cmake/v3.31.5/bin/cmake",
     "raspberry-pi-pico.ninjaPath": "${HOME}/.pico-sdk/ninja/v1.12.1/ninja",
     "files.associations": {
-        "ssd1306.h": "c"
+        "*.c": "c",
+        "ssd1306.h": "c",
+        "stdio.h": "c"
     }
 }

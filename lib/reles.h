@@ -4,10 +4,11 @@
 #include "pico/stdlib.h"
 #include "pico/bootrom.h"
 
-#define rele1 16
+#define rele1 12
 #define BOTAO_A 5
 #define BOTAO_JOY 22
 #define BOTAO_B 6
+
 
 void gpio_irq_handler(uint gpio, uint32_t events)
 {
@@ -33,7 +34,7 @@ void iniciar_botoes()
 }
 
 #include "hardware/adc.h"
-#define potenciometro 28
+#define potenciometro 26
 
 uint16_t adc_value_x;
 float volume;
@@ -41,7 +42,7 @@ float volume;
 void adc_gpio28()
 {
     // Leitura dos valores analógicos
-    adc_select_input(2);
+    adc_select_input(0);
     adc_value_x = adc_read();
     volume = (adc_value_x / 4095.0) * 100.0;
 }
