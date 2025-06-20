@@ -8,14 +8,13 @@
 #include "reles.h" 
 
 const char HTML_BODY[] =
-    "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Controle do LED</title>"
+    "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Controle do RELÉ</title>"
     "<style>"
-    "body { font-family: sans-serif; text-align: center; padding: 10px; margin: 0; background:rgb(250, 250, 250); }"
+    "body { font-family: sans-serif; text-align: center; padding: 10px; margin: 0; background: #f9f9f9; }"
     ".botao { font-size: 20px; padding: 10px 30px; margin: 10px; border: none; border-radius: 8px; }"
     ".on { background: #4CAF50; color: white; }"
     ".off { background: #f44336; color: white; }"
     ".barra { width: 30%; background: #ddd; border-radius: 6px; overflow: hidden; margin: 0 auto 15px auto; height: 20px; }"
-
     ".preenchimento { height: 100%; transition: width 0.3s ease; }"
     "#barra_x { background: #2196F3; }"
     ".label { font-weight: bold; margin-bottom: 5px; display: block; }"
@@ -26,7 +25,7 @@ const char HTML_BODY[] =
     "function sendCommand(cmd) { fetch('/RELE1/' + cmd); }"
     "function atualizar() {"
     "  fetch('/estado').then(res => res.json()).then(data => {"
-    "    document.getElementById('estado').innerText = data.RELE1 ? 'Bomba ligada' : 'bomba desligada';"
+    "    document.getElementById('estado').innerText = data.RELE1 ? 'Ligado' : 'Desligado';"
     "    document.getElementById('x_valor').innerText = data.x;"
     "    document.getElementById('botao').innerText = data.botao ? 'Pressionado' : 'Solto';"
     "    document.getElementById('joy').innerText = data.joy ? 'Pressionado' : 'Solto';"
@@ -42,20 +41,18 @@ const char HTML_BODY[] =
     "setInterval(atualizar, 1000);"
     "</script></head><body>"
 
-    "<h1>MONITORAMENTO DE VOLUME E CONTROLE DE BOMBA D'AGUA</h1>"
+    "<h1>Controle do RELÉ</h1>"
 
-    "<p>Status: <span id='estado'>--</span></p>"
+    "<p>Estado do RELÉ: <span id='estado'>--</span></p>"
 
-    "<p class='label'>VOLUME DO RESERVATÓRIO: <span id='x_valor'>--</span></p>"
+    "<p class='label'>Joystick X: <span id='x_valor'>--</span></p>"
     "<div class='barra'><div id='barra_x' class='preenchimento'></div></div>"
 
     "<p class='label'>Botão A: <span id='botao'>--</span> <span id='bolinha_a' class='bolinha'></span></p>"
     "<p class='label'>Botão do Joystick: <span id='joy'>--</span> <span id='bolinha_joy' class='bolinha'></span></p>"
 
-    "<button class='botao on' onclick=\"sendCommand('on')\">Ligar bomba</button>"
-    "<button class='botao off' onclick=\"sendCommand('off')\">Desligar bomba</button>"
-
-    "<p id='alerta' style='color: red; font-weight: bold; font-size: 18px;'></p>"
+    "<button class='botao on' onclick=\"sendCommand('on')\">Ligar</button>"
+    "<button class='botao off' onclick=\"sendCommand('off')\">Desligar</button>"
 
     "<hr style='margin-top: 20px;'>"
     "<p style='font-size: 15px; color: #336699; font-style: italic; max-width: 90%; margin: 10px auto;'>"

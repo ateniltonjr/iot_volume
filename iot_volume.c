@@ -3,8 +3,8 @@
 #include "interface.h"
 #include "wifi_init.h"
 
-#define WIFI_SSID "KLAZ"
-#define WIFI_PASS "10213250"
+#define WIFI_SSID "Jesus é o caminho"
+#define WIFI_PASS "123456789"
 
 char str_x[5], str_v[5]; // Buffer para armazenar a string
 
