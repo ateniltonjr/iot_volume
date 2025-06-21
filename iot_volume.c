@@ -1,9 +1,12 @@
+// Bibliotecas
+
 #include "lwip/tcp.h"
 #include "display.h"
 #include "interface.h"
 #include "wifi_init.h"
 #include "desenho_matriz.h"
 #include "matrixws.h"
+#include "reles.h"
 
 #define WIFI_SSID "KLAZ"
 #define WIFI_PASS "10213250"
@@ -45,16 +48,22 @@ int main()
     iniciar_wifi(WIFI_SSID, WIFI_PASS);
     sleep_ms(2000);
 
+    //Buzzer:
+    pwm_init_buzzer(BUZZER_PIN); // inicializa o buzzer
+    void alerta_volume();
+
     adc_init();
     adc_gpio_init(potenciometro);
 
     start_http_server(); 
     
+    // Ativando as funções
     while (true)
     {
         cyw43_arch_poll();
         exibicoes_display();
         atualizar_nivel_na_matriz((int)volume);
+        alerta_volume();
         sleep_ms(300);
     }
 
