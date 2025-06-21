@@ -3,6 +3,7 @@
 #include "interface.h"
 #include "wifi_init.h"
 #include "desenho_matriz.h"
+#include "matrixws.h"
 
 #define WIFI_SSID "KLAZ"
 #define WIFI_PASS "10213250"
@@ -53,6 +54,7 @@ int main()
     {
         cyw43_arch_poll();
         exibicoes_display();
+        atualizar_nivel_na_matriz((int)volume);
         sleep_ms(300);
     }
 
