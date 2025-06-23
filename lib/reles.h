@@ -18,13 +18,20 @@
 #define LED_G 11 
 #define LED_B 12 
 #define LED_R 13
-#define BUZZER_PIN 10 
+#define BUZZER_PIN 10
+#define RELE_PIN 16          // PINO PARA CONEXÃO COM O RELÉ NO PROJETO FISICO
 
 // Configuração da frequência do buzzer (em Hz)
 #define BUZZER_FREQUENCY 3500
 
 // Definição de uma função para inicializar o PWM no pino do buzzer
 
+
+// ADIÇÃO DO RELÉ PARA CONREXÃO FÍSICA
+void init_rele(){
+    gpio_init(RELE_PIN);
+    gpio_set_dir(RELE_PIN, GPIO_OUT);  
+}
 
 void init_led_rgb() {
     gpio_init(LED_R);
@@ -41,6 +48,7 @@ void set_led_rgb(bool ligada) {
         gpio_put(LED_R, 0);
         gpio_put(LED_G, 1); 
         gpio_put(LED_B, 0);
+        gpio_put(RELE_PIN, 1);              // AQUI DEVE SER INSERIDO A CONEXÃO COM O RELÉ PARA CONTROLE
         if (log_counter % 50 == 0) {
             printf("LED RGB: Bomba ligada (verde)\n");
         }
@@ -48,6 +56,7 @@ void set_led_rgb(bool ligada) {
         gpio_put(LED_R, 0);
         gpio_put(LED_G, 0);
         gpio_put(LED_B, 0);
+        gpio_put(RELE_PIN, 0);              // AQUI DEVE SER INSERIDO A CONEXÃO COM O RELÉ PARA CONTROLE
         if (log_counter % 50 == 0) {
             printf("LED RGB: Bomba desligada\n");
         }
@@ -92,6 +101,7 @@ void iniciar_botoes()
 
 #include "hardware/adc.h"
 #define potenciometro 26
+#define Relé 
 
 uint16_t adc_value_x;
 float volume;
