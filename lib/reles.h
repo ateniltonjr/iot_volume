@@ -7,8 +7,10 @@
 //Modificações:
 #include "hardware/pwm.h"
 #include "hardware/clocks.h"
+//#include "hardware/irq.h"
 
 // Configuração do pino do buzzer
+<<<<<<< Updated upstream
 
 #define rele1 12
 #define BOTAO_A 5
@@ -19,9 +21,25 @@
 #define LED_B 12 
 #define LED_R 13
 #define BUZZER_PIN 10 
+=======
+#define BUZZER_PIN 21
+#define rele1 12
+#define BOTAO_A 5
+#define BOTAO_B 6
+
+// Declaração dos botões do Joytick (JVRS)
+
+#define JOYSTICK_Y 27
+#define JOYSTICK_SW 22 // botão do joystick para voltar ao menu do display oled
+
+>>>>>>> Stashed changes
 
 // Configuração da frequência do buzzer (em Hz)
 #define BUZZER_FREQUENCY 3500
+
+// Variáveis globais
+enum { MENU_PRINCIPAL, TELA_MONITORAMENTO, TELA_LIMITES } estado_menu = MENU_PRINCIPAL;
+
 
 // Definição de uma função para inicializar o PWM no pino do buzzer
 
@@ -54,6 +72,7 @@ void set_led_rgb(bool ligada) {
     }
 }
 
+<<<<<<< Updated upstream
 void init_buzzer() {
     gpio_set_function(BUZZER_PIN, GPIO_FUNC_PWM);
     uint slice_num = pwm_gpio_to_slice_num(BUZZER_PIN);
@@ -63,6 +82,11 @@ void init_buzzer() {
     pwm_set_enabled(slice_num, true);
     printf("Buzzer inicializado\n");
 }
+=======
+//
+
+
+>>>>>>> Stashed changes
 
 void set_buzzer(bool ligado) {
     pwm_set_gpio_level(BUZZER_PIN, ligado ? 256 : 0); 
@@ -82,12 +106,20 @@ void iniciar_botoes()
     gpio_set_dir(BOTAO_B, GPIO_IN);
     gpio_pull_up(BOTAO_B);
 
+<<<<<<< Updated upstream
     gpio_init(JOYSTICK_SW);
     gpio_set_dir(JOYSTICK_SW, GPIO_IN);
     gpio_pull_up(JOYSTICK_SW);
 
+=======
+    // Relé concetado na GPIO16, adicionar lógica no .C
+>>>>>>> Stashed changes
     gpio_init(rele1);
-    gpio_set_dir(rele1, GPIO_OUT);
+    gpio_set_dir(rele1, GPIO_OUT); 
+
+    gpio_init(JOYSTICK_SW);
+    gpio_set_dir(JOYSTICK_SW, GPIO_IN);
+    gpio_pull_up(JOYSTICK_SW);
 }
 
 #include "hardware/adc.h"

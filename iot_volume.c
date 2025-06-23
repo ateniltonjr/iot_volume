@@ -1,5 +1,6 @@
 // Bibliotecas
-
+#include "pico/cyw43_arch.h" //Biblioteca para conexão (JVRS)
+#include "pico/stdlib.h"
 #include "lwip/tcp.h"
 #include "display.h"
 #include "interface.h"
@@ -7,16 +8,22 @@
 //#include "desenho_matriz.h"
 #include "lib/matrixws.h"
 #include "reles.h"
+#include "matrixws.h"
+//#include "hardware/irq.h"
 
 
+<<<<<<< Updated upstream
 
 #define WS2812_PIN 7     // GPIO para matriz de LEDs WS2812
 
+=======
+>>>>>>> Stashed changes
 #define WIFI_SSID "RL"
 #define WIFI_PASS "12345678"
 
 char str_x[5], str_v[5]; // Buffer para armazenar a string
 
+<<<<<<< Updated upstream
 void gpio_irq_handler(uint gpio, uint32_t events) {
     static uint32_t last_press = 0;
     uint32_t current_time = to_ms_since_boot(get_absolute_time());
@@ -37,22 +44,40 @@ void gpio_irq_handler(uint gpio, uint32_t events) {
 
 int main() {
     
+=======
+int main() {
+>>>>>>> Stashed changes
     stdio_init_all();
     sleep_ms(2000);
     printf("Iniciando sistema de controle de nível...\n");
 
+<<<<<<< Updated upstream
     iniciar_display();
     iniciar_wifi(WIFI_SSID, WIFI_PASS);
 
     gpio_set_irq_enabled_with_callback(BOTAO_A, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler);
     gpio_set_irq_enabled(BOTAO_B, GPIO_IRQ_EDGE_FALL, true);
     gpio_set_irq_enabled(JOYSTICK_SW, GPIO_IRQ_EDGE_FALL, true);
+=======
+    iniciar_wifi(WIFI_SSID, WIFI_PASS);
+
+    // As inicializações estão no arquivo rele.h
+
+    printf("Botões A, B e Joystick configurados\n");
+
+    iniciar_botoes();
+
+    //gpio_set_irq_enabled_with_callback(BOTAO_A, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler);
+    //gpio_set_irq_enabled(BOTAO_B, GPIO_IRQ_EDGE_FALL, true);
+    //gpio_set_irq_enabled(JOYSTICK_SW, GPIO_IRQ_EDGE_FALL, true);
+>>>>>>> Stashed changes
     printf("Interrupções dos botões configuradas\n");
 
     adc_init();
     adc_gpio_init(JOYSTICK_Y);
     printf("ADC e joystick inicializados\n");
 
+<<<<<<< Updated upstream
     PIO pio = pio0;
     uint offset = pio_add_program(pio, &ws2812_program);
     ws2812_program_init(pio, 0, offset, WS2812_PIN, 800000, false);
@@ -62,6 +87,11 @@ int main() {
     init_buzzer();
     start_http_server();
     iniciar_botoes();
+=======
+    init_led_rgb();
+    init_buzzer();
+    start_http_server();
+>>>>>>> Stashed changes
     printf("--------------------------------\n");
 
     while (true) {
