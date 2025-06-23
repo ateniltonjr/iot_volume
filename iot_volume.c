@@ -4,12 +4,16 @@
 #include "display.h"
 #include "interface.h"
 #include "wifi_init.h"
-#include "desenho_matriz.h"
-#include "matrixws.h"
+//#include "desenho_matriz.h"
+#include "lib/matrixws.h"
 #include "reles.h"
 
-#define WIFI_SSID "KLAZ"
-#define WIFI_PASS "10213250"
+
+
+#define WS2812_PIN 7     // GPIO para matriz de LEDs WS2812
+
+#define WIFI_SSID "RL"
+#define WIFI_PASS "12345678"
 
 char str_x[5], str_v[5]; // Buffer para armazenar a string
 
@@ -43,8 +47,12 @@ int main()
     iniciar_botoes();
     gpio_set_irq_enabled_with_callback(BOTAO_B, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler);
 
+    PIO pio = pio0;
+    uint offset = pio_add_program(pio, &ws2812_program);
+    ws2812_program_init(pio, 0, offset, WS2812_PIN, 800000, false);
+
     stdio_init_all();
-    controle(PINO_MATRIZ); // Inicializa a matriz de LEDs
+    //controle(PINO_MATRIZ); // Inicializa a matriz de LEDs
     iniciar_wifi(WIFI_SSID, WIFI_PASS);
     sleep_ms(2000);
 
@@ -62,9 +70,10 @@ int main()
     {
         cyw43_arch_poll();
         exibicoes_display();
-        atualizar_nivel_na_matriz((int)volume);
+        //atualizar_nivel_na_matriz((int)volume);
         alerta_volume();
         sleep_ms(300);
+        acender_matriz_janela(100);
     }
 
     cyw43_arch_deinit(); // Desativa o Wi-Fi

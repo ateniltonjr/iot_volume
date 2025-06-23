@@ -1,103 +1,60 @@
-#include "lib/matrixws.h"
-#include "hardware/pio.h"
-#include "lib/ws2818b.pio.h"
+#include "matrixws.h"
+#include "pico/stdlib.h" // Para sleep_us
 
-npLED_t leds[NUM_LEDS];  
-PIO np_pio;             
-uint sm;                 
-uint8_t brilho_global = BRILHO_PADRAO; 
+// Variável estática para armazenar o último valor de abertura
+static float ultima_abertura = -1.0f;
 
-
-void set_brilho(uint8_t brilho) {
-    brilho_global = (brilho > BRILHO_MAX) ? BRILHO_MAX : brilho;
+// Função auxiliar para enviar um pixel à matriz WS2812
+static inline void put_pixel(uint32_t pixel_grb)
+{
+    pio_sm_put_blocking(pio0, 0, pixel_grb << 8u); // Envia o valor RGB ao PIO
 }
 
-
-int getIndex(int x, int y) {
-    if (x % 2 == 0) { 
-        return 24 - (x * 5 + y); 
-    } else { 
-        return 24 - (x * 5 + (4 - y)); 
-    }
+// Função auxiliar para converter valores RGB em formato de 32 bits para a matriz WS2812
+static inline uint32_t urgb_u32(uint8_t r, uint8_t g, uint8_t b)
+{
+    return ((uint32_t)(r) << 8) | ((uint32_t)(g) << 16) | (uint32_t)(b); // Combina R, G e B em um único valor
 }
 
-
-void bf() {
-    for (uint i = 0; i < NUM_LEDS; ++i) {
-        
-        uint8_t r = (leds[i].R * brilho_global) / BRILHO_MAX;
-        uint8_t g = (leds[i].G * brilho_global) / BRILHO_MAX;
-        uint8_t b = (leds[i].B * brilho_global) / BRILHO_MAX;
-        
-        pio_sm_put_blocking(np_pio, sm, r);
-        pio_sm_put_blocking(np_pio, sm, g);
-        pio_sm_put_blocking(np_pio, sm, b);
+void acender_matriz_janela(float abertura) {
+    // Verifica se a abertura mudou desde a última chamada
+    if (abertura == ultima_abertura) {
+        return; // Não atualiza os LEDs se o valor de abertura não mudou
     }
-    sleep_us(100); 
-}
+    ultima_abertura = abertura;
 
+    int pixel_map[5][5] = {              // Mapeamento de índices da matriz WS2812
+        {24, 23, 22, 21, 20},            // Linha 1: índices dos LEDs
+        {15, 16, 17, 18, 19},            // Linha 2: índices dos LEDs
+        {14, 13, 12, 11, 10},            // Linha 3: índices dos LEDs
+        {5,  6,  7,  8,  9},             // Linha 4: índices dos LEDs
+        {4,  3,  2,  1,  0}              // Linha 5: índices dos LEDs
+    };
+    uint32_t pixels[25]; // Array para armazenar os valores RGB dos LEDs
 
-void controle(uint pino) {
-    uint offset = pio_add_program(pio0, &ws2818b_program);
-    np_pio = pio0;
-    sm = pio_claim_unused_sm(np_pio, true);
-    ws2818b_program_init(np_pio, sm, offset, pino, 800000.f);
-
-    desliga(); 
-}
-
-
-void cores(const uint indice, const uint8_t r, const uint8_t g, const uint8_t b) {
-    leds[indice].R = r;
-    leds[indice].G = g;
-    leds[indice].B = b;
-}
-
-
-void desliga() {
-    for (uint i = 0; i < NUM_LEDS; ++i) {
-        cores(i, 0, 0, 0);
+    // Zerar todos os LEDs para evitar lixo ou LEDs fantasmas
+    for (int i = 0; i < 25; i++) {
+        pixels[i] = urgb_u32(0, 0, 0); // Desliga todos os LEDs (RGB = 0, 0, 0)
     }
-    bf();
-}
 
+    // Garante que a abertura esteja no intervalo de 0 a 100%
+    if (abertura < 0.0f) abertura = 0.0f;
+    if (abertura > 100.0f) abertura = 100.0f;
 
-void desenhaMatriz(int mat[5][5][3]) {
-    for (int linha = 0; linha < 5; linha++) {
-        for (int cols = 0; cols < 5; cols++) {
-            int posicao = getIndex(linha, cols);
-            cores(posicao, mat[linha][cols][0], mat[linha][cols][1], mat[linha][cols][2]);
-        }
-    }
-    bf();
-}
+    // Calcula a intensidade (0 a 255) proporcional à abertura
+    uint8_t intensidade = (uint8_t)((abertura * 255.0f) / 100.0f);
 
+    // Acende os 4 LEDs no canto superior direito com cor branca e intensidade proporcional
+    pixels[pixel_map[0][3]] = urgb_u32(intensidade, intensidade, intensidade); // LED [0][3] (índice 21)
+    pixels[pixel_map[0][4]] = urgb_u32(intensidade, intensidade, intensidade); // LED [0][4] (índice 20)
+    pixels[pixel_map[1][3]] = urgb_u32(intensidade, intensidade, intensidade); // LED [1][3] (índice 18)
+    pixels[pixel_map[1][4]] = urgb_u32(intensidade, intensidade, intensidade); // LED [1][4] (índice 19)
 
-void sequencia_rgb() {
-    
-    desliga();
-    
-    // Sequência vermelho
-    for (int i = 0; i < NUM_LEDS; i++) {
-        cores(i, BRILHO_MAX, 0, 0);
-        bf();
-        sleep_ms(100);
+    // Envia os valores RGB para a matriz de LEDs
+    for (int i = 0; i < 25; i++) {
+        put_pixel(pixels[i]);
     }
-    
-    // Sequência verde
-    for (int i = 0; i < NUM_LEDS; i++) {
-        cores(i, 0, BRILHO_MAX, 0);
-        bf();
-        sleep_ms(100);
-    }
-    
-    // Sequência azul
-    for (int i = 0; i < NUM_LEDS; i++) {
-        cores(i, 0, 0, BRILHO_MAX);
-        bf();
-        sleep_ms(100);
-    }
-    
-    // Desliga no final
-    desliga();
+
+    // Adiciona um atraso para garantir que os WS2812 latcharem os dados corretamente
+    sleep_us(100); // 100µs de silêncio (mais que o mínimo de 50µs requerido)
 }
