@@ -44,6 +44,7 @@
         "cyw43_arch.h": "c",
         "stdlib.h": "c",
         "compare": "c",
-        "cstdint": "c"
+        "cstdint": "c",
+        "display.h": "c"
     }
 }

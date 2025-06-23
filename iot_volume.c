@@ -17,65 +17,84 @@
 
 char str_x[5], str_v[5]; // Buffer para armazenar a string
 
-void exibicoes_display()
-{
-    adc_gpio28(); // Chama a função para ler o ADC do GPIO 28
+void gpio_irq_handler(uint gpio, uint32_t events) {
+    static uint32_t last_press = 0;
+    uint32_t current_time = to_ms_since_boot(get_absolute_time());
+    if (current_time - last_press < 200) return;
+    last_press = current_time;
 
-    sprintf(str_x, "%d", adc_value_x);            // Converte o inteiro em string
-    sprintf(str_v, "%.0f", volume);
-    ssd1306_fill(&ssd, !cor);                     // Limpa o display
-    ssd1306_rect(&ssd, 3, 3, 122, 60, cor, !cor); // Desenha um retângulo
-    ssd1306_line(&ssd, 3, 25, 123, 25, cor);      // Desenha uma linha
-    ssd1306_line(&ssd, 3, 37, 123, 37, cor);      // Desenha uma linha
-
-    ssd1306_draw_string(&ssd, "CEPEDI   TIC37", 8, 6); // Desenha uma string
-    ssd1306_draw_string(&ssd, "EMBARCATECH", 20, 16);  // Desenha uma string
-    ssd1306_draw_string(&ssd, ip_str, 10, 28);
-    ssd1306_draw_string(&ssd, "X  VOLUME PB", 20, 41);           // Desenha uma string
-    ssd1306_line(&ssd, 44, 37, 44, 60, cor);                     // Desenha uma linha vertical
-    ssd1306_draw_string(&ssd, str_x, 8, 52);                     // Desenha uma string
-    ssd1306_draw_string(&ssd, str_v, 64, 52);        // Desenha uma string
-    ssd1306_rect(&ssd, 52, 90, 8, 8, cor, !gpio_get(BOTAO_JOY)); // Desenha um retângulo
-    ssd1306_rect(&ssd, 52, 102, 8, 8, cor, !gpio_get(BOTAO_A));  // Desenha um retângulo
-    ssd1306_rect(&ssd, 52, 114, 8, 8, cor, !cor);                // Desenha um retângulo
-    ssd1306_send_data(&ssd);                                     // Atualiza o display
+    if (gpio == BOTAO_A && events == GPIO_IRQ_EDGE_FALL && estado_menu == MENU_PRINCIPAL) {
+        estado_menu = TELA_MONITORAMENTO;
+        printf("Botão A: pressionado\n");
+    } else if (gpio == BOTAO_B && events == GPIO_IRQ_EDGE_FALL && estado_menu == MENU_PRINCIPAL) {
+        estado_menu = TELA_LIMITES;
+        printf("Botão B: pressionado\n");
+    } else if (gpio == JOYSTICK_SW && events == GPIO_IRQ_EDGE_FALL) {
+        estado_menu = MENU_PRINCIPAL;
+        printf("Botão Joystick: pressionado, retornando ao menu principal\n");
+    }
 }
 
-int main()
-{   
+int main() {
+    
+    stdio_init_all();
+    sleep_ms(2000);
+    printf("Iniciando sistema de controle de nível...\n");
+
     iniciar_display();
-    iniciar_botoes();
-    gpio_set_irq_enabled_with_callback(BOTAO_B, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler);
+    iniciar_wifi(WIFI_SSID, WIFI_PASS);
+
+    gpio_set_irq_enabled_with_callback(BOTAO_A, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler);
+    gpio_set_irq_enabled(BOTAO_B, GPIO_IRQ_EDGE_FALL, true);
+    gpio_set_irq_enabled(JOYSTICK_SW, GPIO_IRQ_EDGE_FALL, true);
+    printf("Interrupções dos botões configuradas\n");
+
+    adc_init();
+    adc_gpio_init(JOYSTICK_Y);
+    printf("ADC e joystick inicializados\n");
 
     PIO pio = pio0;
     uint offset = pio_add_program(pio, &ws2812_program);
     ws2812_program_init(pio, 0, offset, WS2812_PIN, 800000, false);
+    printf("PIO para WS2812 inicializado\n");
 
-    stdio_init_all();
-    //controle(PINO_MATRIZ); // Inicializa a matriz de LEDs
-    iniciar_wifi(WIFI_SSID, WIFI_PASS);
-    sleep_ms(2000);
+    init_led_rgb();
+    init_buzzer();
+    start_http_server();
+    iniciar_botoes();
+    printf("--------------------------------\n");
 
-    //Buzzer:
-    pwm_init_buzzer(BUZZER_PIN); // inicializa o buzzer
-    void alerta_volume();
-
-    adc_init();
-    adc_gpio_init(potenciometro);
-
-    start_http_server(); 
-    
-    // Ativando as funções
-    while (true)
-    {
+    while (true) {
         cyw43_arch_poll();
-        exibicoes_display();
-        //atualizar_nivel_na_matriz((int)volume);
-        alerta_volume();
-        sleep_ms(300);
-        acender_matriz_janela(100);
-    }
 
-    cyw43_arch_deinit(); // Desativa o Wi-Fi
-    return 0; // Finaliza o programa
+        adc_select_input(1);
+        uint16_t adc_value = adc_read();
+        nivel_agua = (adc_value * 100) / 4095;
+
+        if (nivel_agua < lim_min) {
+            bomba_ligada = true;
+            if (log_counter % 50 == 0) {
+                printf("Bomba ligada: nível abaixo de %d%%\n", lim_min);
+            }
+        } else if (nivel_agua > lim_max) {
+            bomba_ligada = false;
+            if (log_counter % 50 == 0) {
+                printf("Bomba desligada: nível acima de %d%%\n", lim_max);
+            }
+        }
+
+        if (log_counter % 50 == 0) {
+            printf("Nível de água lido: %d%%\n", nivel_agua);
+        }
+
+        set_matriz_nivel(nivel_agua);
+        set_led_rgb(bomba_ligada);
+        set_buzzer(bomba_ligada);
+        update_display(&ssd);
+
+        log_counter++;
+        sleep_ms(100);
+    }
+    cyw43_arch_deinit();
+    return 0;
 }

@@ -9,57 +9,68 @@
 #include "hardware/clocks.h"
 
 // Configuração do pino do buzzer
-#define BUZZER_PIN 21
+
+#define rele1 12
+#define BOTAO_A 5
+#define JOYSTICK_SW 22
+#define BOTAO_B 6
+#define JOYSTICK_Y 27
+#define LED_G 11 
+#define LED_B 12 
+#define LED_R 13
+#define BUZZER_PIN 10 
 
 // Configuração da frequência do buzzer (em Hz)
 #define BUZZER_FREQUENCY 3500
 
 // Definição de uma função para inicializar o PWM no pino do buzzer
-void pwm_init_buzzer(uint pin) {
-    // Configurar o pino como saída de PWM
-    gpio_set_function(pin, GPIO_FUNC_PWM);
 
-    // Obter o slice do PWM associado ao pino
-    uint slice_num = pwm_gpio_to_slice_num(pin);
 
-    // Configurar o PWM com frequência desejada
-    pwm_config config = pwm_get_default_config();
-    pwm_config_set_clkdiv(&config, clock_get_hz(clk_sys) / (BUZZER_FREQUENCY * 4096)); // Divisor de clock
-    pwm_init(slice_num, &config, true);
-
-    // Iniciar o PWM no nível baixo
-    pwm_set_gpio_level(pin, 0);
+void init_led_rgb() {
+    gpio_init(LED_R);
+    gpio_set_dir(LED_R, GPIO_OUT);
+    gpio_init(LED_G);
+    gpio_set_dir(LED_G, GPIO_OUT);
+    gpio_init(LED_B);
+    gpio_set_dir(LED_B, GPIO_OUT);
+    printf("LED RGB inicializado\n");
 }
 
-// Definição de uma função para emitir um beep com duração especificada
-void beep(uint pin, uint duration_ms) {
-    // Obter o slice do PWM associado ao pino
-    uint slice_num = pwm_gpio_to_slice_num(pin);
-
-    // Configurar o duty cycle para 50% (ativo)
-    pwm_set_gpio_level(pin, 2048);
-
-    // Temporização
-    sleep_ms(duration_ms);
-
-    // Desativar o sinal PWM (duty cycle 0)
-    pwm_set_gpio_level(pin, 0);
-
-    // Pausa entre os beeps
-    sleep_ms(100); // Pausa de 100ms
+void set_led_rgb(bool ligada) {
+    if (ligada) {
+        gpio_put(LED_R, 0);
+        gpio_put(LED_G, 1); 
+        gpio_put(LED_B, 0);
+        if (log_counter % 50 == 0) {
+            printf("LED RGB: Bomba ligada (verde)\n");
+        }
+    } else {
+        gpio_put(LED_R, 0);
+        gpio_put(LED_G, 0);
+        gpio_put(LED_B, 0);
+        if (log_counter % 50 == 0) {
+            printf("LED RGB: Bomba desligada\n");
+        }
+    }
 }
 
-//
-
-#define rele1 12
-#define BOTAO_A 5
-#define BOTAO_JOY 22
-#define BOTAO_B 6
-
-void gpio_irq_handler(uint gpio, uint32_t events)
-{
-    reset_usb_boot(0, 0);
+void init_buzzer() {
+    gpio_set_function(BUZZER_PIN, GPIO_FUNC_PWM);
+    uint slice_num = pwm_gpio_to_slice_num(BUZZER_PIN);
+    uint clk_div = clock_get_hz(clk_sys) / (1000 * 4096); // Frequência ~1000Hz
+    pwm_set_clkdiv(slice_num, clk_div);
+    pwm_set_wrap(slice_num, 4095); // Resolução PWM
+    pwm_set_enabled(slice_num, true);
+    printf("Buzzer inicializado\n");
 }
+
+void set_buzzer(bool ligado) {
+    pwm_set_gpio_level(BUZZER_PIN, ligado ? 256 : 0); 
+    if (log_counter % 50 == 0) {
+        printf("Buzzer: %s\n", ligado ? "ligado" : "desligado");
+    }
+}
+
 
 void iniciar_botoes()
 {
@@ -71,9 +82,9 @@ void iniciar_botoes()
     gpio_set_dir(BOTAO_B, GPIO_IN);
     gpio_pull_up(BOTAO_B);
 
-    gpio_init(BOTAO_JOY);
-    gpio_set_dir(BOTAO_JOY, GPIO_IN);
-    gpio_pull_up(BOTAO_JOY);
+    gpio_init(JOYSTICK_SW);
+    gpio_set_dir(JOYSTICK_SW, GPIO_IN);
+    gpio_pull_up(JOYSTICK_SW);
 
     gpio_init(rele1);
     gpio_set_dir(rele1, GPIO_OUT);
@@ -93,18 +104,5 @@ void adc_gpio28()
     volume = (adc_value_x / 4095.0) * 100.0;
 }
 //modificações (intervalo de limites)
-void alerta_volume() {
-     pwm_init_buzzer(BUZZER_PIN);
-
-
-    if (volume >= 90.0) {
-        gpio_put(rele1, 0); // Desliga o relé automaticamente
-        beep(BUZZER_PIN, 250); // Bipe de 500ms
-        
-    } else if (volume <= 85.0 && volume >= 75.0) {
-        printf("ALERTA: Volume do reservatório em %.0f%%!\n", volume);
-        beep(BUZZER_PIN, 500); // Bipe de 500ms
-    }
-}
 
 #endif
