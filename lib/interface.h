@@ -8,7 +8,7 @@
 #include "reles.h" 
 
 const char HTML_BODY[] =
-"<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Controle do RELÉ</title>"
+"<!DOCTYPE html><html><head><meta charset='UTF-16'><title>Controle da Bomba</title>"
 "<style>"
 "body { font-family: sans-serif; text-align: center; padding: 10px; margin: 0; background: #f9f9f9; }"
 ".botao { font-size: 20px; padding: 10px 30px; margin: 10px; border: none; border-radius: 8px; }"
@@ -40,22 +40,22 @@ const char HTML_BODY[] =
 "setInterval(atualizar, 1000);"
 "</script></head><body>"
 
-"<h1>Controle do RELÉ</h1>"
+"<h1>Controle da Bomba</h1>"
 
-"<p>Estado do RELÉ: <span id='estado'>--</span></p>"
+"<p>Estado da bomba: <span id='estado'>--</span></p>"
 
-"<p class='label'>Joystick X: <span id='x_valor'>--</span></p>"
+"<p class='label'>Volume: <span id='x_valor'>--</span>%</p>"
 "<div class='barra'><div id='barra_x' class='preenchimento'></div></div>"
 
 "<p class='label'>Botão A: <span id='botao'>--</span> <span id='bolinha_a' class='bolinha'></span></p>"
-"<p class='label'>Botão do Joystick: <span id='joy'>--</span> <span id='bolinha_joy' class='bolinha'></span></p>"
+"<p class='label'>Botão para a bomba: <span id='joy'>--</span> <span id='bolinha_joy' class='bolinha'></span></p>"
 
 "<button class='botao on' onclick=\"sendCommand('on')\">Ligar</button>"
 "<button class='botao off' onclick=\"sendCommand('off')\">Desligar</button>"
 
 "<hr style='margin-top: 20px;'>"
-"<p style='font-size: 15px; color: #336699; font-style: italic; max-width: 90%; margin: 10px auto;'>"
-"Utilização da BitDogLab para exemplificar a comunicação via rede Wi-Fi utilizando o protocolo HTML com JavaScript"
+"<p style='font-size: 15px; color:rgb(171, 53, 20); font-style: italic; max-width: 90%; margin: 10px auto;'>"
+"Controle de bomba d'agua usando um relé e um ADC para monitorar o volume do reservatório. "
 "</p>"
 
 "</body></html>";

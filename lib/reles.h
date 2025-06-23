@@ -49,17 +49,13 @@ void beep(uint pin, uint duration_ms) {
     sleep_ms(100); // Pausa de 100ms
 }
 
-//
-
+// Definição do pino do relé
 #define rele1 12
 #define BOTAO_A 5
 #define BOTAO_JOY 22
 #define BOTAO_B 6
 
-void gpio_irq_handler(uint gpio, uint32_t events)
-{
-    reset_usb_boot(0, 0);
-}
+
 
 void iniciar_botoes()
 {
@@ -104,6 +100,12 @@ void alerta_volume() {
     } else if (volume <= 85.0 && volume >= 75.0) {
         printf("ALERTA: Volume do reservatório em %.0f%%!\n", volume);
         beep(BUZZER_PIN, 500); // Bipe de 500ms
+    }
+    else if(volume < 20)
+    {
+        gpio_put(rele1, 1); // Liga o relé automaticamente
+        printf("Reservatório vazio!\n");
+        beep(BUZZER_PIN, 1000); // Bipe de 1000ms
     }
 }
 
