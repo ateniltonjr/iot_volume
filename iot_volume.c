@@ -65,6 +65,10 @@ int main()
         exibicoes_display();
         if (estado_matriz) {
             atualizar_nivel_na_matriz((int)volume); // Atualiza a matriz apenas se estiver ligada
+        } else {
+            // Garante que a matriz permaneça desligada
+            desliga();
+            bf();
         }
         alerta_volume();
         // --- Ações dos botões ---
@@ -82,7 +86,8 @@ int main()
             else
             {
                 estado_matriz = false;
-                desliga();
+                desliga(); // Garante que todos os LEDs sejam apagados
+                bf();      // Força atualização da matriz
                 buzzer_off(); // Desativa o buzzer junto com a matriz
             }
             flag_toggle_matriz = false;

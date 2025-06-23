@@ -53,12 +53,13 @@ void cores(const uint indice, const uint8_t r, const uint8_t g, const uint8_t b)
     leds[indice].B = b;
 }
 
-
 void desliga() {
-    for (uint i = 0; i < NUM_LEDS; ++i) {
-        cores(i, 0, 0, 0);
+    for (int i = 0; i < NUM_LEDS; i++) {
+        leds[i].R = 0;
+        leds[i].G = 0;
+        leds[i].B = 0;
     }
-    bf();
+    bf(); // Atualiza a matriz para aplicar o desligamento
 }
 
 
