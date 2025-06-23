@@ -68,7 +68,7 @@ int main() {
     while (true) {
         cyw43_arch_poll();
 
-        adc_select_input(1);
+        adc_select_input(2);                  // Alteração do canal para utilizar o potenciometro na GPIO28
         uint16_t adc_value = adc_read();
         nivel_agua = (adc_value * 100) / 4095;
 
