@@ -43,6 +43,7 @@ int main() {
 
     iniciar_display();
     iniciar_wifi(WIFI_SSID, WIFI_PASS);
+    init_rele(bomba_ligada);
 
     gpio_set_irq_enabled_with_callback(BOTAO_A, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler);
     gpio_set_irq_enabled(BOTAO_B, GPIO_IRQ_EDGE_FALL, true);
