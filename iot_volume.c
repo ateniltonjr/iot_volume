@@ -37,32 +37,6 @@ void exibicoes_display()
     ssd1306_send_data(&ssd);                                     // Atualiza o display
 }
 
-#define debounce_delay 300
-volatile uint tempo_interrupcao = 0;
-volatile bool flag_toggle_rele = false;
-volatile bool flag_toggle_matriz = false;
-
-void gpio_irq_handler(uint gpio, uint32_t events)
-{
-    uint tempo_atual = to_ms_since_boot(get_absolute_time());
-    if (tempo_atual - tempo_interrupcao > debounce_delay)
-    {
-        if(gpio == BOTAO_B)
-        {
-            reset_usb_boot(0, 0);
-        }
-        else if (gpio == BOTAO_A)
-        {
-            flag_toggle_rele = true;
-        }
-        else if (gpio == BOTAO_JOY)
-        {
-            flag_toggle_matriz = true;
-        }
-        tempo_interrupcao = tempo_atual;
-    }
-}
-
 int main()
 {   
     iniciar_display();
@@ -89,7 +63,9 @@ int main()
     {
         cyw43_arch_poll();
         exibicoes_display();
-        //atualizar_nivel_na_matriz((int)volume);
+        if (estado_matriz) {
+            atualizar_nivel_na_matriz((int)volume); // Atualiza a matriz apenas se estiver ligada
+        }
         alerta_volume();
         // --- Ações dos botões ---
         if (flag_toggle_rele) {

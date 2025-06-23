@@ -27,7 +27,6 @@ include_directories( ${CMAKE_SOURCE_DIR}/lib )
 add_executable(${PROJECT_NAME}  
         iot_volume.c #Principal
         lib/ssd1306.c
-        lib/desenho_matriz.c
         lib/matrixws.c)
 
 target_link_libraries(${PROJECT_NAME} 
