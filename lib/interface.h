@@ -7,7 +7,6 @@
 #include "pico/stdlib.h"
 #include "reles.h" 
 
-<<<<<<< Updated upstream
 
 // Variáveis globais
 
@@ -74,75 +73,6 @@ const char *HTML_BODY =
 "</html>";
 
 
-=======
-uint16_t nivel_agua = 0; // 0-100%
-uint16_t lim_min = 10;
-uint16_t lim_max = 90;
-static uint32_t log_counter = 0;
-bool bomba_ligada = false;
-
-const char *HTML_BODY =
-"<!DOCTYPE html>"
-"<html lang='pt-BR'>\n"
-"<head>\n"
-"  <meta charset='UTF-8'>\n"
-"  <title>Controle e Monitoramento de Nível de Água</title>\n"
-"  <style>\n"
-"    body { font-family: sans-serif; text-align: center; padding: 10px; margin: 0; background: #f0f0f0; color: #333; }\n"
-"    .container { display: flex; flex-direction: column; align-items: center; }\n"
-"    .content { display: flex; justify-content: center; width: 100%; }\n"
-"    .tanque { width: 100px; height: 300px; background: #ccc; border: 2px solid #333; position: relative; overflow: hidden; margin: 20px; }\n"
-"    .nivel { width: 100%; background: #007BFF; position: absolute; bottom: 0; transition: height 0.5s ease; z-index: 1; }\n"
-"    .boia { width: 20px; height: 20px; background: #ffff00; border-radius: 50%; position: absolute; left: 40px; transition: transform 0.5s ease; z-index: 2; }\n"
-"    .info { margin-left: 20px; text-align: left; }\n"
-"    .botao { font-size: 18px; padding: 8px 20px; margin: 5px; border: none; border-radius: 5px; background: #007BFF; color: white; cursor: pointer; }\n"
-"    .label { font-weight: bold; margin: 5px 0; }\n"
-"    input { padding: 5px; width: 80px; margin: 5px; }\n"
-"  </style>\n"
-"  <script>\n"
-"    function saveLimits() {\n"
-"      const min = document.getElementById('min_limit').value;\n"
-"      const max = document.getElementById('max_limit').value;\n"
-"      fetch(`/set_limits?min=${min}&max=${max}`);\n"
-"    }\n"
-"    function atualizar() {\n"
-"      fetch('/update')\n"
-"        .then(res => res.json())\n"
-"        .then(data => {\n"
-"          document.getElementById('nivel').innerText = data.nivel + '%';\n"
-"          const bombaStatus = document.getElementById('bomba_status');\n"
-"          bombaStatus.innerText = data.bomba ? 'Ligada' : 'Desligada';\n"
-"          const nivelHeight = (data.nivel / 100) * 300;\n"
-"          document.getElementById('nivel_barra').style.height = nivelHeight + 'px';\n"
-"          document.getElementById('boia').style.transform = `translateY(${300 - nivelHeight - 10}px)`;\n"
-"        });\n"
-"    }\n"
-"    setInterval(atualizar, 1000);\n"
-"  </script>\n"
-"</head>\n"
-"<body>\n"
-"  <div class='container'>\n"
-"    <h2>Controle e Monitoramento de Nível de Água</h2>\n"
-"    <div class='content'>\n"
-"      <div>\n"
-"        <div class='label'>Nível: <span id='nivel'>--%</span></div>\n"
-"        <div class='tanque'>\n"
-"          <div id='nivel_barra' class='nivel'></div>\n"
-"          <div id='boia' class='boia'></div>\n"
-"        </div>\n"
-"      </div>\n"
-"      <div class='info'>\n"
-"        <div class='label'>Bomba: <span id='bomba_status'>--</span></div>\n"
-"        <div class='label'>Limite Mínimo: <input type='number' id='min_limit' min='0' max='100' value='10'></div>\n"
-"        <div class='label'>Limite Máximo: <input type='number' id='max_limit' min='0' max='100' value='90'></div>\n"
-"        <button class='botao' onclick='saveLimits()'>Salvar</button>\n"
-"      </div>\n"
-"    </div>\n"
-"  </div>\n"
-"</body>\n"
-"</html>";
-
->>>>>>> Stashed changes
 // Webserver
 struct http_state {
     char response[4096];
