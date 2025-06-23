@@ -49,6 +49,16 @@ void beep(uint pin, uint duration_ms) {
     sleep_ms(100); // Pausa de 100ms
 }
 
+// Função para ligar o buzzer (50% duty cycle)
+static inline void buzzer_on() {
+    pwm_set_gpio_level(BUZZER_PIN, 2048);
+}
+
+// Função para desligar o buzzer (0% duty cycle)
+static inline void buzzer_off() {
+    pwm_set_gpio_level(BUZZER_PIN, 0);
+}
+
 // Definição do pino do relé
 #define rele1 12
 #define BOTAO_A 5
@@ -88,25 +98,29 @@ void adc_gpio28()
     adc_value_x = adc_read();
     volume = (adc_value_x / 4095.0) * 100.0;
 }
+
+bool estado_matriz = false;
+
 //modificações (intervalo de limites)
 void alerta_volume() {
-     pwm_init_buzzer(BUZZER_PIN);
-
-
+    if (!estado_matriz) {
+        buzzer_off(); // Garante que o buzzer fique desligado se a matriz estiver desligada
+        return;
+    }
+    pwm_init_buzzer(BUZZER_PIN);
     if (volume >= 90.0) {
         gpio_put(rele1, 0); // Desliga o relé automaticamente
-        beep(BUZZER_PIN, 250); // Bipe de 500ms
-        
+        beep(BUZZER_PIN, 250); // Bipe de 250ms
     } else if (volume <= 85.0 && volume >= 75.0) {
         printf("ALERTA: Volume do reservatório em %.0f%%!\n", volume);
         beep(BUZZER_PIN, 500); // Bipe de 500ms
-    }
-    else if(volume < 20)
-    {
+    } else if(volume < 20) {
         gpio_put(rele1, 1); // Liga o relé automaticamente
         printf("Reservatório vazio!\n");
         beep(BUZZER_PIN, 1000); // Bipe de 1000ms
     }
 }
+
+
 
 #endif

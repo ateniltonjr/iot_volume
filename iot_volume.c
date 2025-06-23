@@ -8,8 +8,8 @@
 #include "matrixws.h"
 #include "reles.h"
 
-#define WIFI_SSID " "
-#define WIFI_PASS " "
+#define WIFI_SSID "KLAZ"
+#define WIFI_PASS "10213250"
 
 char str_x[5], str_v[5]; // Buffer para armazenar a string
 
@@ -41,7 +41,6 @@ void exibicoes_display()
 volatile uint tempo_interrupcao = 0;
 volatile bool flag_toggle_rele = false;
 volatile bool flag_toggle_matriz = false;
-bool estado_matriz = false;
 
 void gpio_irq_handler(uint gpio, uint32_t events)
 {
@@ -102,11 +101,13 @@ int main()
             {
                 estado_matriz = true;
                 atualizar_nivel_na_matriz((int)volume);
+                buzzer_on(); // Ativa o buzzer junto com a matriz
             }
             else
             {
                 estado_matriz = false;
                 desliga();
+                buzzer_off(); // Desativa o buzzer junto com a matriz
             }
             flag_toggle_matriz = false;
         }
